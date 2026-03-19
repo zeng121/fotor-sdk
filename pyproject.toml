@@ -26,6 +26,6 @@ classifiers = [
 dependencies = ["aiohttp>=3.9", "python-dotenv>=1.0"]
 
 [project.urls]
-Homepage = "https://github.com/nickolasburr/fotor-sdk"
-Documentation = "https://github.com/nickolasburr/fotor-sdk#readme"
-Issues = "https://github.com/nickolasburr/fotor-sdk/issues"
+Homepage = "https://github.com/zeng121/fotor-sdk"
+Documentation = "https://github.com/zeng121/fotor-sdk#readme"
+Issues = "https://github.com/zeng121/fotor-sdk/issues"
