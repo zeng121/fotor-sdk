@@ -48,18 +48,14 @@ logging.basicConfig(
 )
 log = logging.getLogger("test")
 
-SAMPLE_IMAGE = (
-    "https://images.unsplash.com/photo-1529778873920-4da4926a72c2"
-    "?w=800&q=80"
-)
-SAMPLE_IMAGE_2 = (
-    "https://images.unsplash.com/photo-1518791841217-8f162f1e1131"
-    "?w=800&q=80"
-)
-SAMPLE_IMAGE_3 = (
-    "https://images.unsplash.com/photo-1574158622682-e40e69881006"
-    "?w=800&q=80"
-)
+SAMPLE_IMAGE = "https://images.unsplash.com/photo-1529778873920-4da4926a72c2"
+    
+
+SAMPLE_IMAGE_2 = "https://images.unsplash.com/photo-1518791841217-8f162f1e1131"
+   
+
+SAMPLE_IMAGE_3 = "https://images.unsplash.com/photo-1574158622682-e40e69881006"
+
 
 PASS = "\033[92m[PASS]\033[0m"
 FAIL = "\033[91m[FAIL]\033[0m"
@@ -156,7 +152,7 @@ async def test_background_remove(client: FotorClient) -> None:
 
 async def test_text2video(client: FotorClient) -> None:
     name = "text2video"
-    model = cli_overrides.get("model_id", "kling-v3")
+    model = cli_overrides.get("model_id", "seedance-1-5-pro-251215")
     dur = cli_overrides.get("duration", 5)
     try:
         result = await text2video(
@@ -164,7 +160,7 @@ async def test_text2video(client: FotorClient) -> None:
             prompt="Gentle ocean waves at golden hour, cinematic slow motion",
             model_id=model,
             duration=dur,
-            resolution="1080p",
+            resolution="720p",
             aspect_ratio="16:9",
             on_poll=poll_logger,
         )
@@ -175,8 +171,8 @@ async def test_text2video(client: FotorClient) -> None:
 
 async def test_single_image2video(client: FotorClient) -> None:
     name = "single_image2video"
-    model = cli_overrides.get("model_id", "doubao-seedance-1-5-pro")
-    dur = cli_overrides.get("duration", 4)
+    model = cli_overrides.get("model_id", "seedance-1-5-pro-251215")
+    dur = cli_overrides.get("duration", 5)
     try:
         result = await single_image2video(
             client,
@@ -184,7 +180,7 @@ async def test_single_image2video(client: FotorClient) -> None:
             model_id=model,
             image_url=SAMPLE_IMAGE,
             duration=dur,
-            resolution="1080p",
+            resolution="720p",
             on_poll=poll_logger,
         )
         record(name, result.success, result.result_url or result.error or "")
@@ -204,7 +200,7 @@ async def test_start_end_frame2video(client: FotorClient) -> None:
             start_image_url=SAMPLE_IMAGE,
             end_image_url=SAMPLE_IMAGE_2,
             duration=dur,
-            resolution="1080p",
+            resolution="720p",
             on_poll=poll_logger,
         )
         record(name, result.success, result.result_url or result.error or "")
@@ -223,7 +219,7 @@ async def test_multiple_image2video(client: FotorClient) -> None:
             model_id=model,
             image_urls=[SAMPLE_IMAGE, SAMPLE_IMAGE_2, SAMPLE_IMAGE_3],
             duration=dur,
-            resolution="1080p",
+            resolution="720p",
             on_poll=poll_logger,
         )
         record(name, result.success, result.result_url or result.error or "")

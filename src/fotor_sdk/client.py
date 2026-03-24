@@ -61,7 +61,7 @@ class FotorClient:
     async def create_task(self, path: str, payload: dict[str, Any]) -> str:
         """Submit a task and return the ``task_id``."""
         url = f"{self._endpoint}{path}"
-        logger.debug("POST %s  payload=%s", url, payload)
+        logger.info("POST %s  payload=%s", url, payload)
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
