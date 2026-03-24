@@ -48,24 +48,23 @@ logging.basicConfig(
 )
 log = logging.getLogger("test")
 
-SAMPLE_IMAGE = (
-    "https://images.unsplash.com/photo-1529778873920-4da4926a72c2"
-    "?w=800&q=80"
-)
-SAMPLE_IMAGE_2 = (
-    "https://images.unsplash.com/photo-1518791841217-8f162f1e1131"
-    "?w=800&q=80"
-)
-SAMPLE_IMAGE_3 = (
-    "https://images.unsplash.com/photo-1574158622682-e40e69881006"
-    "?w=800&q=80"
-)
+SAMPLE_IMAGE = "https://images.unsplash.com/photo-1529778873920-4da4926a72c2"
+    
+
+SAMPLE_IMAGE_2 = "https://images.unsplash.com/photo-1518791841217-8f162f1e1131"
+   
+
+SAMPLE_IMAGE_3 = "https://images.unsplash.com/photo-1574158622682-e40e69881006"
+
 
 PASS = "\033[92m[PASS]\033[0m"
 FAIL = "\033[91m[FAIL]\033[0m"
 SKIP = "\033[93m[SKIP]\033[0m"
 
 results_summary: list[tuple[str, str, str]] = []
+
+# CLI overrides — populated by main(), read by test functions.
+cli_overrides: dict[str, Any] = {}
 
 
 def record(name: str, passed: bool, detail: str = "") -> None:
@@ -87,11 +86,12 @@ def poll_logger(r: TaskResult) -> None:
 
 async def test_text2image(client: FotorClient) -> None:
     name = "text2image"
+    model = cli_overrides.get("model_id", "seedream-4-5-251128")
     try:
         result = await text2image(
             client,
             prompt="A watercolor painting of a mountain lake at sunrise",
-            model_id="seedream-4-5-251128",
+            model_id=model,
             resolution="1k",
             aspect_ratio="1:1",
             on_poll=poll_logger,
@@ -103,11 +103,12 @@ async def test_text2image(client: FotorClient) -> None:
 
 async def test_image2image(client: FotorClient) -> None:
     name = "image2image"
+    model = cli_overrides.get("model_id", "seedream-4-5-251128")
     try:
         result = await image2image(
             client,
             prompt="Transform into an oil painting style, warm tones",
-            model_id="seedream-4-5-251128",
+            model_id=model,
             image_urls=[SAMPLE_IMAGE],
             resolution="1k",
             aspect_ratio="1:1",
@@ -151,13 +152,15 @@ async def test_background_remove(client: FotorClient) -> None:
 
 async def test_text2video(client: FotorClient) -> None:
     name = "text2video"
+    model = cli_overrides.get("model_id", "seedance-1-5-pro-251215")
+    dur = cli_overrides.get("duration", 5)
     try:
         result = await text2video(
             client,
             prompt="Gentle ocean waves at golden hour, cinematic slow motion",
-            model_id="kling-v3",
-            duration=5,
-            resolution="1080p",
+            model_id=model,
+            duration=dur,
+            resolution="720p",
             aspect_ratio="16:9",
             on_poll=poll_logger,
         )
@@ -168,14 +171,16 @@ async def test_text2video(client: FotorClient) -> None:
 
 async def test_single_image2video(client: FotorClient) -> None:
     name = "single_image2video"
+    model = cli_overrides.get("model_id", "seedance-1-5-pro-251215")
+    dur = cli_overrides.get("duration", 5)
     try:
         result = await single_image2video(
             client,
             prompt="Camera slowly zooms in, leaves gently swaying",
-            model_id="kling-v3",
+            model_id=model,
             image_url=SAMPLE_IMAGE,
-            duration=5,
-            resolution="1080p",
+            duration=dur,
+            resolution="720p",
             on_poll=poll_logger,
         )
         record(name, result.success, result.result_url or result.error or "")
@@ -185,15 +190,17 @@ async def test_single_image2video(client: FotorClient) -> None:
 
 async def test_start_end_frame2video(client: FotorClient) -> None:
     name = "start_end_frame2video"
+    model = cli_overrides.get("model_id", "kling-v3")
+    dur = cli_overrides.get("duration", 5)
     try:
         result = await start_end_frame2video(
             client,
             prompt="Smooth transition from day to night",
-            model_id="kling-v3",
+            model_id=model,
             start_image_url=SAMPLE_IMAGE,
             end_image_url=SAMPLE_IMAGE_2,
-            duration=5,
-            resolution="1080p",
+            duration=dur,
+            resolution="720p",
             on_poll=poll_logger,
         )
         record(name, result.success, result.result_url or result.error or "")
@@ -203,14 +210,16 @@ async def test_start_end_frame2video(client: FotorClient) -> None:
 
 async def test_multiple_image2video(client: FotorClient) -> None:
     name = "multiple_image2video"
+    model = cli_overrides.get("model_id", "kling-v3")
+    dur = cli_overrides.get("duration", 5)
     try:
         result = await multiple_image2video(
             client,
             prompt="A montage of cute cats in different scenes",
-            model_id="kling-v3",
+            model_id=model,
             image_urls=[SAMPLE_IMAGE, SAMPLE_IMAGE_2, SAMPLE_IMAGE_3],
-            duration=5,
-            resolution="1080p",
+            duration=dur,
+            resolution="720p",
             on_poll=poll_logger,
         )
         record(name, result.success, result.result_url or result.error or "")
@@ -337,11 +346,8 @@ async def test_error_handling(client: FotorClient) -> None:
 # Sync wrappers
 # -----------------------------------------------------------------------
 
-def test_sync_wrapper() -> None:
-    name = "submit_and_wait_sync"
-    api_key = os.environ.get("FOTOR_OPENAPI_KEY", "")
-    endpoint = os.environ.get("FOTOR_OPENAPI_ENDPOINT", "https://api.fotor.com")
-    client = FotorClient(api_key=api_key, endpoint=endpoint)
+async def test_sync_wrapper(client: FotorClient) -> None:
+    name = "sync_wrapper"
     try:
         result = client.submit_and_wait_sync(
             "/v1/aiart/imagegeneration/seedream-4-5-251128",
@@ -359,23 +365,10 @@ def test_sync_wrapper() -> None:
 
 
 # -----------------------------------------------------------------------
-# Main
+# Test registry
 # -----------------------------------------------------------------------
 
-TEST_GROUPS: dict[str, list[str]] = {
-    "image": [
-        "text2image", "image2image", "image_upscale", "background_remove",
-    ],
-    "video": [
-        "text2video", "single_image2video",
-        "start_end_frame2video", "multiple_image2video",
-    ],
-    "runner": ["runner"],
-    "error": ["error"],
-    "sync": ["sync"],
-}
-
-ASYNC_DISPATCH: dict[str, Any] = {
+TEST_REGISTRY: dict[str, Any] = {
     "text2image": test_text2image,
     "image2image": test_image2image,
     "image_upscale": test_image_upscale,
@@ -386,12 +379,49 @@ ASYNC_DISPATCH: dict[str, Any] = {
     "multiple_image2video": test_multiple_image2video,
     "runner": test_runner,
     "error": test_error_handling,
+    "sync_wrapper": test_sync_wrapper,
+}
+
+TEST_GROUPS: dict[str, list[str]] = {
+    "image": ["text2image", "image2image", "image_upscale", "background_remove"],
+    "video": ["text2video", "single_image2video", "start_end_frame2video", "multiple_image2video"],
+    "runner": ["runner"],
+    "error": ["error"],
+    "sync": ["sync_wrapper"],
 }
 
 
-async def async_main(groups: list[str]) -> None:
+def resolve_test_names(selectors: list[str]) -> list[str]:
+    """Resolve a mix of group names and individual test names into a flat list."""
+    names: list[str] = []
+    for s in selectors:
+        if s in TEST_GROUPS:
+            names.extend(TEST_GROUPS[s])
+        elif s in TEST_REGISTRY:
+            names.append(s)
+        else:
+            print(f"WARNING: unknown test or group '{s}', skipping", file=sys.stderr)
+    seen: set[str] = set()
+    return [n for n in names if not (n in seen or seen.add(n))]  # type: ignore[func-returns-value]
+
+
+def print_available_tests() -> None:
+    print("Available test groups:")
+    for group, tests in TEST_GROUPS.items():
+        print(f"  {group:<12s} -> {', '.join(tests)}")
+    print()
+    print("Available individual tests:")
+    for name in TEST_REGISTRY:
+        print(f"  {name}")
+
+
+# -----------------------------------------------------------------------
+# Main
+# -----------------------------------------------------------------------
+
+async def async_main(test_names: list[str]) -> None:
     api_key = os.environ.get("FOTOR_OPENAPI_KEY", "")
-    endpoint = os.environ.get("FOTOR_OPENAPI_ENDPOINT", "https://api.fotor.com")
+    endpoint = os.environ.get("FOTOR_OPENAPI_ENDPOINT", "https://api-b.fotor.com")
 
     if not api_key:
         print("ERROR: set FOTOR_OPENAPI_KEY first", file=sys.stderr)
@@ -399,26 +429,18 @@ async def async_main(groups: list[str]) -> None:
 
     client = FotorClient(api_key=api_key, endpoint=endpoint)
 
-    test_names: list[str] = []
-    for g in groups:
-        test_names.extend(TEST_GROUPS.get(g, []))
-
     log.info("=" * 60)
-    log.info("Fotor SDK Feature Test  (groups: %s)", ", ".join(groups))
+    log.info("Fotor SDK Feature Test  (%d tests: %s)", len(test_names), ", ".join(test_names))
     log.info("endpoint: %s", endpoint)
     log.info("=" * 60)
 
     start = time.monotonic()
 
     for tn in test_names:
-        fn = ASYNC_DISPATCH.get(tn)
+        fn = TEST_REGISTRY.get(tn)
         if fn:
             log.info("--- %s ---", tn)
             await fn(client)
-
-    if "sync" in groups:
-        log.info("--- sync ---")
-        test_sync_wrapper()
 
     elapsed = time.monotonic() - start
     print()
@@ -444,16 +466,56 @@ async def async_main(groups: list[str]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Test all fotor-sdk features")
+    parser = argparse.ArgumentParser(
+        description="Test all fotor-sdk features",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     parser.add_argument(
         "--only",
-        choices=list(TEST_GROUPS.keys()),
         nargs="+",
-        default=list(TEST_GROUPS.keys()),
-        help="run only specific test groups (default: all)",
+        metavar="NAME",
+        help="run specific groups or individual tests (e.g. --only image single_image2video)",
+    )
+    parser.add_argument(
+        "--list", "-l",
+        action="store_true",
+        help="list all available tests and groups",
+    )
+    parser.add_argument(
+        "--model-id", "-m",
+        metavar="MODEL",
+        help="override model_id for all tests (e.g. kling-v3, seedream-4-5-251128)",
+    )
+    parser.add_argument(
+        "--duration", "-d",
+        type=int,
+        metavar="SEC",
+        help="override video duration in seconds (e.g. 5, 10)",
     )
     args = parser.parse_args()
-    asyncio.run(async_main(args.only))
+
+    if args.list:
+        print_available_tests()
+        return
+
+    if args.model_id:
+        cli_overrides["model_id"] = args.model_id
+    if args.duration is not None:
+        cli_overrides["duration"] = args.duration
+
+    if cli_overrides:
+        log.info("CLI overrides: %s", cli_overrides)
+
+    if args.only:
+        test_names = resolve_test_names(args.only)
+    else:
+        test_names = resolve_test_names(list(TEST_GROUPS.keys()))
+
+    if not test_names:
+        print("No tests selected. Use --list to see available tests.", file=sys.stderr)
+        sys.exit(1)
+
+    asyncio.run(async_main(test_names))
 
 
 if __name__ == "__main__":

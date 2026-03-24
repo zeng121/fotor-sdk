@@ -14,7 +14,7 @@ logger = logging.getLogger("fotor_sdk")
 _OK_CODE = "000"
 _TASK_STATUS_PATH = "/v1/aiart/tasks"
 
-_DEFAULT_ENDPOINT = "https://api.fotor.com"
+_DEFAULT_ENDPOINT = " https://api-b.fotor.com "
 _DEFAULT_POLL_INTERVAL = 2.0
 _DEFAULT_MAX_POLL_SECONDS = 1200
 
@@ -61,7 +61,7 @@ class FotorClient:
     async def create_task(self, path: str, payload: dict[str, Any]) -> str:
         """Submit a task and return the ``task_id``."""
         url = f"{self._endpoint}{path}"
-        logger.debug("POST %s  payload=%s", url, payload)
+        logger.info("POST %s  payload=%s", url, payload)
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
