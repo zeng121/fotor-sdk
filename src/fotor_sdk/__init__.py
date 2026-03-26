@@ -1,6 +1,6 @@
 """Fotor OpenAPI SDK -- lightweight, standalone, async-first."""
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 from .client import FotorClient, FotorAPIError
 from .models import TaskResult, TaskSpec, TaskStatus
