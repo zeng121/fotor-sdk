@@ -132,7 +132,14 @@ class FotorClient:
         """
         start = time.monotonic()
         while True:
-            result = await self.get_task_status(task_id)
+            try:
+                result = await self.get_task_status(task_id)
+            except Exception:
+                await asyncio.sleep(self._poll_interval)
+                if (time.monotonic() - start) >= self._max_poll_seconds:
+                    return TaskResult(task_id=task_id, status=TaskStatus.TIMEOUT,
+                                      error=f"polling timed out after {self._max_poll_seconds}s")
+                continue
             result.elapsed_seconds = time.monotonic() - start
 
             if on_poll is not None:
