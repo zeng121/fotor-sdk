@@ -1,6 +1,6 @@
 # fotor-sdk
 
-Lightweight, async-first Python SDK for the [Fotor OpenAPI](https://api.fotor.com).
+Lightweight, async-first Python SDK for the [Fotor OpenAPI](https://api-b.fotor.com).
 Generate images and videos with a single API key -- no MCP server, no S3, no
 internal services required.
 
@@ -79,7 +79,7 @@ asyncio.run(main())
 | Environment Variable | Required | Default | Description |
 |---|---|---|---|
 | `FOTOR_OPENAPI_KEY` | Yes | -- | Your Fotor OpenAPI key |
-| `FOTOR_OPENAPI_ENDPOINT` | No | `https://api.fotor.com` | API base URL |
+| `FOTOR_OPENAPI_ENDPOINT` | No | `https://api-b.fotor.com` | API base URL |
 
 ## Available Task Functions
 
@@ -101,7 +101,7 @@ asyncio.run(main())
 ```python
 FotorClient(
     api_key: str,
-    endpoint: str = "https://api.fotor.com",
+    endpoint: str = "https://api-b.fotor.com",
     poll_interval: float = 2.0,
     max_poll_seconds: float = 1200,
 )
