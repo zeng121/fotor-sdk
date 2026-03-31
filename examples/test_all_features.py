@@ -221,7 +221,7 @@ async def test_start_end_frame2video(client: FotorClient) -> None:
 
 async def test_multiple_image2video(client: FotorClient) -> None:
     name = "multiple_image2video"
-    model = cli_overrides.get("model_id", "kling-v3")
+    model = cli_overrides.get("model_id", "kling-v3-omni")
     dur = cli_overrides.get("duration", 5)
     try:
         result = await multiple_image2video(
